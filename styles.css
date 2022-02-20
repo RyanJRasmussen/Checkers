@@ -22,8 +22,13 @@ h1{
     margin-top: 20px;
     margin-bottom: 20px;
 }
-.king{
-    border-color: blueviolet;
+
+.black.king {
+    border-color: gold;
+}
+
+.red.king {
+    border-color: gold;
 }
 
 
@@ -48,7 +53,7 @@ h1{
 
 
 .white-square {
-    background-color: white;
+    background-color: snow;
 }
 
 .black-square {
@@ -75,4 +80,9 @@ left: 10%;
 top: 50%;
 font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 font-size: x-large;
+}
+
+button {
+    font-size: larger;
+
 }

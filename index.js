@@ -10,6 +10,18 @@ let startingPositions = [
     [1, 0, 1, 0, 1, 0, 1, 0]
 ]
 
+
+
+//reset button logic
+
+// let resetButton = document.querySelector('button')
+// resetButton.onclick = function(){
+//     for (let i = 0; i < allSquares.length; i++) {        
+//         allSquares[i].innerHTML = ''
+//     }
+//     setBoard()
+// }
+
 let activePositions = [
     [0, 2, 0, 2, 0, 2, 0, 2],
     [2, 0, 2, 0, 2, 0, 2, 0],
@@ -62,18 +74,19 @@ setBoard()
 
 let redScore = 0;
 let blackScore = 0;
-let selectedPiece;
+
 
 
 let blacksTurn = true;
+let allPieces = document.getElementsByClassName('pieces')
 let redPieces = document.querySelectorAll(".red");
 let blackPieces = document.querySelectorAll(".black");
 let turntracker = document.querySelector('#turntracker');
 
-function changeTurn(){
 
+function changeTurn(){
     if(blacksTurn === true){
-        turntracker.textContent = "Black's Turn"
+        turntracker.textContent = "Black's turn"
         for (let i = 0; i < redPieces.length; i++){
             blackPieces[i].setAttribute('draggable', 'true')
             redPieces[i].setAttribute('draggable', 'false')
@@ -87,7 +100,6 @@ function changeTurn(){
         }
         blacksTurn = true
     }
-
 }
 changeTurn()
 
@@ -128,10 +140,12 @@ document.addEventListener("dragover", (event) => {
 document.addEventListener("dragenter", (event) => {
     // change the squares color when hovered over
     // only allows hover events if the square is empty
+    let originalSquare = movedPiece.parentNode
+    let chosenSquare = event.target
 
-    if(event.target.classList.contains("black-square")){
-        if(event.target.innerHTML === ""){
-            event.target.style.backgroundColor = "green"
+    if(chosenSquare.classList.contains("black-square") && chosenSquare.innerHTML === ""){
+        if(limitMoves(chosenSquare, originalSquare, movedPiece)){
+            chosenSquare.style.backgroundColor = "green"
         }
     }
 }, false)
@@ -145,8 +159,6 @@ document.addEventListener("dragleave", (event) => {
 
 
 let movedPieceID;
-let previousSquare;
-let chosenPiecePosition;
 let row;
 let allSquares = document.getElementsByClassName('square')
 
@@ -174,23 +186,113 @@ function changeActiveLayout(chosenSquare, originalSquare){
     }
 }
 
+// function checkMoveLegality(chosenSquare, originalSquare){
+//     if(movedPiece.classList.contains('king')){
+
+//     } else if(movedPiece.classList.contains('black')){
+        
+//         for (let i = 0; i < array.length; i++) {
+//             for (let e = 0; e < array.length; e++) {
+//                 let chosenSquare.id === boardPositions[i][e]
+//             }
+//         }
+//     } else {
+
+//     }
+// }
+
+
+function findChosenSquareCoordinates(chosenSquare){
+    let x;
+    let y;
+    for (let i = 0; i < 8; i++) {
+        for (let e = 0; e < 8; e++) {
+            if(chosenSquare.id === boardPositions[i][e]){
+                x = e;
+                y = i;
+            }
+        }
+    }
+    return [x, y]
+}
+
+function findOriginalSquareCoordinates(originalSquare){
+    let a;
+    let b;
+    for (let i = 0; i < 8; i++) {
+        for (let e = 0; e < 8; e++) {
+            if(originalSquare.id === boardPositions[i][e]){
+                a = e;
+                b = i;
+            }
+        }
+    }
+    return [a, b]
+}
+
+function kingMe(chosenSquare){
+    if(movedPiece.classList.contains("red") && chosenSquare.classList.contains("row1") && !movedPiece.classList.contains("king")){
+        movedPiece.classList.add("king")
+    } else if (movedPiece.classList.contains("black") && chosenSquare.classList.contains("row8") && !movedPiece.classList.contains("king")){
+        movedPiece.classList.add("king")
+    }
+}
+
+function differentColor(chosenSquare){
+    findChosenSquareCoordinates(chosenSquare)
+    // if same color, return true
+}
+
+
+function limitMoves(chosenSquare, originalSquare, movedPiece){
+
+//coordinates to compare
+    let originalCoords = findOriginalSquareCoordinates(originalSquare)
+    let newCoords = findChosenSquareCoordinates(chosenSquare)
+
+    if(movedPiece.classList.contains('king')){
+        if((originalCoords[1] === newCoords[1] - 1 || originalCoords[1] === newCoords[1] + 1) 
+        && 
+        (originalCoords[0] === newCoords[0] - 1 || originalCoords[0] === newCoords[0] + 1 )){
+            return true
+        } else if(originalCoords[1] === newCoords[1] - 2 || originalCoords[1] === newCoords[1] + 2 
+            && (originalCoords[0] === newCoords[0] - 2 || originalCoords[0] === newCoords[0] + 2 ))
+            {
+            return true
+        }
+    } else if(movedPiece.classList.contains('black')){
+        if(originalCoords[1] === newCoords[1] + 1 && (newCoords[0] === originalCoords[0] + 1 || newCoords[0] === originalCoords[0] -1)){
+            return true
+        }
+    } else {
+        if(originalCoords[1] === newCoords[1] - 1 
+            && (newCoords[0] === originalCoords[0] + 1 
+            || newCoords[0] === originalCoords[0] -1)){
+            return true
+        }
+    }
+}
+
+
+function movePieceToNewDiv(chosenSquare, originalSquare){
+    chosenSquare.style.backgroundColor = "";
+    changeActiveLayout(chosenSquare, originalSquare)
+    originalSquare.removeChild(movedPiece)
+    chosenSquare.append(movedPiece)
+}
+
 
 
 document.addEventListener("drop", (event) => {
-    event.preventDefault();
+    // event.preventDefault();
     let originalSquare = movedPiece.parentNode
     let chosenSquare = event.target
-    // move piece to the div of the square it is dropped onto
-    if(event.target.classList.contains("black-square")){
-            event.target.style.backgroundColor = "";
-            if(event.target.innerHTML === ""){
-                changeActiveLayout(chosenSquare, originalSquare)
-                console.log(activePositions)
 
-                movedPiece.parentNode.removeChild(movedPiece)
-                event.target.append(movedPiece)
-                changeTurn()
-            }
+    if(chosenSquare.classList.contains("black-square") && chosenSquare.innerHTML === ""){
+        if(limitMoves(chosenSquare, originalSquare, movedPiece)){
+            movePieceToNewDiv(chosenSquare, originalSquare)
+            kingMe(chosenSquare)
+            changeTurn()
+        }
     }
-
 }, false);

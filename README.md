@@ -19,6 +19,6 @@ Piece move options are highlighted in some way, showing where the selected piece
 Pieces will be able to capture other pieces by moving diagoally across/over them
 
 Stretch goals: 
-Winning by the opposing player having no available moves left
-A single player mode with a computer-controlled side
-Work on chess eventually
+Winning by the opposing player having no available moves left, a single player mode with a computer-controlled side. 
+Make the board responsive/fit to viewport. Make the piece size based on a ratio, not on fixed pixel width and height.
+Also, want to work on chess eventually, taking the similarities from checkers and building upon/improving them
