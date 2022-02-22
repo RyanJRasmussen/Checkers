@@ -86,6 +86,10 @@ let allPieces = document.getElementsByClassName('pieces')
 let redPieces = document.querySelectorAll(".red");
 let blackPieces = document.querySelectorAll(".black");
 let turntracker = document.querySelector('#turntracker');
+let blackScoreTracker = document.querySelector('#blackScoreTracker')
+let redScoreTracker = document.querySelector('#redScoreTracker')
+blackScoreTracker.textContent = "Black's score: " + String(blackScore)
+redScoreTracker.textContent = "Red's score: " + String(redScore)
 
 
 //function that revokes pieces ability to be interacted with if it is not their color's turn
@@ -243,22 +247,20 @@ function kingMe(chosenSquare){
 
 
 function getMiddleSquareId(originalCoords, newCoords){
-    let middleSquareCoords = [(originalCoords[0] + newCoords[0])/2, (originalCoords[1] + newCoords[1])/2]
+    let middleSquareCoords = [((originalCoords[0] + newCoords[0])/2), ((originalCoords[1] + newCoords[1])/2)]
     let middleSquareId = boardPositions[middleSquareCoords[1]][middleSquareCoords[0]]
     return middleSquareId
 }
 
 function middleSquareDifferentColor(originalCoords, newCoords){
     let middleSquare = document.getElementById(getMiddleSquareId(originalCoords, newCoords))
-        if(middleSquare.childElement){
-            if(middleSquare.childElement.classList.contains('red') && movedPiece.classList.contains('black')){
-                    console.log('Working')
+            if(middleSquare.children[0].classList.contains('red') && movedPiece.classList.contains('black')){
                     return true
-                } else if(middleSquare.childElement.classList.contains('black') && movedPiece.classList.contains('red')){
+                } else if(middleSquare.children[0].classList.contains('black') && movedPiece.classList.contains('red')){
                     return true
                 }
-        }
     }
+
 
 
 function limitColors(chosenSquare, originalSquare){
@@ -270,7 +272,7 @@ function limitColors(chosenSquare, originalSquare){
         && 
         (originalCoords[0] === newCoords[0] - 1 || originalCoords[0] === newCoords[0] + 1 )){
             return true
-        } else if(originalCoords[1] === newCoords[1] - 2 || originalCoords[1] === newCoords[1] + 2 
+        } else if((originalCoords[1] === newCoords[1] - 2 || originalCoords[1] === newCoords[1] + 2) 
             && (originalCoords[0] === newCoords[0] - 2 || originalCoords[0] === newCoords[0] + 2) &&
             middleSquareDifferentColor(originalCoords, newCoords))
         {
@@ -312,12 +314,13 @@ function limitMoves(chosenSquare, originalSquare){
         && 
         (originalCoords[0] === newCoords[0] - 1 || originalCoords[0] === newCoords[0] + 1 )){
             return true
-        } else if(originalCoords[1] === newCoords[1] - 2 || originalCoords[1] === newCoords[1] + 2 
+        } else if((originalCoords[1] === newCoords[1] - 2 || originalCoords[1] === newCoords[1] + 2) 
             && (originalCoords[0] === newCoords[0] - 2 || originalCoords[0] === newCoords[0] + 2) &&
             middleSquareDifferentColor(originalCoords, newCoords))
         {
             let middleSquare = document.getElementById(getMiddleSquareId(originalCoords, newCoords))
             middleSquare.innerHTML = ""
+            if(movedPiece.class)
             return true
         }
     } else if(movedPiece.classList.contains('black')){
@@ -331,6 +334,7 @@ function limitMoves(chosenSquare, originalSquare){
                 let middleSquare = document.getElementById(getMiddleSquareId(originalCoords, newCoords))
                 middleSquare.innerHTML = ""
                 blackScore += 1
+                blackScoreTracker.textContent = "Black's score: " + String(blackScore)
                 return true
         }
     } else {
@@ -344,6 +348,7 @@ function limitMoves(chosenSquare, originalSquare){
             let middleSquare = document.getElementById(getMiddleSquareId(originalCoords, newCoords))
             middleSquare.innerHTML = ""
             redScore += 1
+            redScoreTracker.textContent = "Red's score: " + String(redScore)
             return true
         }
     }

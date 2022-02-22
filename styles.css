@@ -86,3 +86,15 @@ button {
     font-size: larger;
 
 }
+
+#blackScoreTracker {
+    position: absolute;
+    right: 80%;
+    bottom: 25%;
+}
+
+#redScoreTracker{
+    position: absolute;
+    right: 80%;
+    bottom: 28%;
+}
