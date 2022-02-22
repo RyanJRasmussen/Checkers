@@ -1,4 +1,7 @@
 //piece position representations
+//startingPositions remains constant since the starting positions will always be constant
+//activePositions is updated each time a drop event is fired
+
 let startingPositions = [
     [0, 2, 0, 2, 0, 2, 0, 2],
     [2, 0, 2, 0, 2, 0, 2, 0],
@@ -10,10 +13,7 @@ let startingPositions = [
     [1, 0, 1, 0, 1, 0, 1, 0]
 ]
 
-
-
 //reset button logic
-
 // let resetButton = document.querySelector('button')
 // resetButton.onclick = function(){
 //     for (let i = 0; i < allSquares.length; i++) {        
@@ -32,6 +32,10 @@ let activePositions = [
     [0, 1, 0, 1, 0, 1, 0, 1],
     [1, 0, 1, 0, 1, 0, 1, 0]
 ]
+
+// boardPositions gives relative positions of the pieces based on the div of the square they are dropped into
+// boardPosition can, with the use of helper functions, be boiled down into coordinates for each move
+// those coordinates can be manipulated to set the bounds on which squares are acceptable based on color, king status, turn, etc.
 
 let boardPositions = [
     ['a8', 'b8', 'c8', 'd8', 'e8', 'f8', 'g8', 'h8'],
@@ -55,6 +59,7 @@ function makePiece(squareID, color){
     selectedSquare.appendChild(newPiece)
 }   
 
+//
 function setBoard(){
     for (let i = 0; i < 8; i++) {
         for (let e = 0; e < 8; e++) {
@@ -75,14 +80,17 @@ setBoard()
 let redScore = 0;
 let blackScore = 0;
 
-
-
+//making variables for all the things I might manipulate with the DOM
 let blacksTurn = true;
 let allPieces = document.getElementsByClassName('pieces')
 let redPieces = document.querySelectorAll(".red");
 let blackPieces = document.querySelectorAll(".black");
 let turntracker = document.querySelector('#turntracker');
 
+
+//function that revokes pieces ability to be interacted with if it is not their color's turn
+//does so by switching the 'draggable' element between true and false each time a move is made
+//draggable must be true for an element to be dragged
 
 function changeTurn(){
     if(blacksTurn === true){
@@ -105,6 +113,11 @@ changeTurn()
 
 
 
+// Below this point is implementation of a drag and drop piece movement system
+
+// The event listeners, of which there are 7, were coded based on the example at https://developer.mozilla.org/en-US/docs/Web/API/Document/drag_event
+// I referenced that code because I had never used event listeners for any of the events used in this drag and drop interface
+// It was helpful for understanding the different events that need to be/can be tracked
 
 let movedPiece;
     
@@ -144,7 +157,7 @@ document.addEventListener("dragenter", (event) => {
     let chosenSquare = event.target
 
     if(chosenSquare.classList.contains("black-square") && chosenSquare.innerHTML === ""){
-        if(limitMoves(chosenSquare, originalSquare, movedPiece)){
+        if(limitColors(chosenSquare, originalSquare)){
             chosenSquare.style.backgroundColor = "green"
         }
     }
@@ -165,42 +178,30 @@ let allSquares = document.getElementsByClassName('square')
 
 
 //function to change 2d array each time a move is made
+// not currently referencing this array for anything, but I could use it to track piece colors and placements for AI
 
 function changeActiveLayout(chosenSquare, originalSquare){
 
     for (let i = 0; i < 8; i++) {
         for (let e = 0; e < 8; e++) {
-    if(blacksTurn){
+            if(blacksTurn){
                 if(chosenSquare.id === boardPositions[i][e]){
                     activePositions[i][e] = 2
                 }
-    } else {
+            } else {
                 if(chosenSquare.id === boardPositions[i][e]){
                     activePositions[i][e] = 1
                 }
             }
-        if(originalSquare.id === boardPositions[i][e]){
-            activePositions[i][e] = 0;
+            if(originalSquare.id === boardPositions[i][e]){
+                activePositions[i][e] = 0;
             }
         }
     }
 }
 
-// function checkMoveLegality(chosenSquare, originalSquare){
-//     if(movedPiece.classList.contains('king')){
-
-//     } else if(movedPiece.classList.contains('black')){
-        
-//         for (let i = 0; i < array.length; i++) {
-//             for (let e = 0; e < array.length; e++) {
-//                 let chosenSquare.id === boardPositions[i][e]
-//             }
-//         }
-//     } else {
-
-//     }
-// }
-
+// functions to reference boardPositions and obtain coordinates of original square of a piece, 
+// and the new square it is attempting to be placed on
 
 function findChosenSquareCoordinates(chosenSquare){
     let x;
@@ -230,6 +231,8 @@ function findOriginalSquareCoordinates(originalSquare){
     return [a, b]
 }
 
+//function to add 'king' to a piece's classlist if it reaches the opposite row
+
 function kingMe(chosenSquare){
     if(movedPiece.classList.contains("red") && chosenSquare.classList.contains("row1") && !movedPiece.classList.contains("king")){
         movedPiece.classList.add("king")
@@ -238,15 +241,27 @@ function kingMe(chosenSquare){
     }
 }
 
-function differentColor(chosenSquare){
-    findChosenSquareCoordinates(chosenSquare)
-    // if same color, return true
+
+function getMiddleSquareId(originalCoords, newCoords){
+    let middleSquareCoords = [(originalCoords[0] + newCoords[0])/2, (originalCoords[1] + newCoords[1])/2]
+    let middleSquareId = boardPositions[middleSquareCoords[1]][middleSquareCoords[0]]
+    return middleSquareId
 }
 
+function middleSquareDifferentColor(originalCoords, newCoords){
+    let middleSquare = document.getElementById(getMiddleSquareId(originalCoords, newCoords))
+        if(middleSquare.childElement){
+            if(middleSquare.childElement.classList.contains('red') && movedPiece.classList.contains('black')){
+                    console.log('Working')
+                    return true
+                } else if(middleSquare.childElement.classList.contains('black') && movedPiece.classList.contains('red')){
+                    return true
+                }
+        }
+    }
 
-function limitMoves(chosenSquare, originalSquare, movedPiece){
 
-//coordinates to compare
+function limitColors(chosenSquare, originalSquare){
     let originalCoords = findOriginalSquareCoordinates(originalSquare)
     let newCoords = findChosenSquareCoordinates(chosenSquare)
 
@@ -256,18 +271,79 @@ function limitMoves(chosenSquare, originalSquare, movedPiece){
         (originalCoords[0] === newCoords[0] - 1 || originalCoords[0] === newCoords[0] + 1 )){
             return true
         } else if(originalCoords[1] === newCoords[1] - 2 || originalCoords[1] === newCoords[1] + 2 
-            && (originalCoords[0] === newCoords[0] - 2 || originalCoords[0] === newCoords[0] + 2 ))
-            {
+            && (originalCoords[0] === newCoords[0] - 2 || originalCoords[0] === newCoords[0] + 2) &&
+            middleSquareDifferentColor(originalCoords, newCoords))
+        {
             return true
         }
     } else if(movedPiece.classList.contains('black')){
-        if(originalCoords[1] === newCoords[1] + 1 && (newCoords[0] === originalCoords[0] + 1 || newCoords[0] === originalCoords[0] -1)){
+        if(originalCoords[1] === newCoords[1] + 1 
+            && (newCoords[0] === originalCoords[0] + 1 
+            || newCoords[0] === originalCoords[0] -1)){
             return true
+        } else if(originalCoords[1] === newCoords[1] + 2 
+            && (originalCoords[0] === newCoords[0] - 2 
+            || originalCoords[0] === newCoords[0] + 2) 
+            && middleSquareDifferentColor(originalCoords, newCoords)){
+            return true
+        }
+    } else if(movedPiece.classList.contains('red')){
+        if(originalCoords[1] === newCoords[1] - 1 
+            && (newCoords[0] === originalCoords[0] + 1 
+            || newCoords[0] === originalCoords[0] -1)){
+            return true
+        } else if(originalCoords[1] === newCoords[1] - 2 
+            && (originalCoords[0] === newCoords[0] - 2 
+            || originalCoords[0] === newCoords[0] + 2) 
+            && middleSquareDifferentColor(originalCoords, newCoords)){
+            return true
+        }
+    }
+}
+
+
+
+function limitMoves(chosenSquare, originalSquare){
+    let originalCoords = findOriginalSquareCoordinates(originalSquare)
+    let newCoords = findChosenSquareCoordinates(chosenSquare)
+
+    if(movedPiece.classList.contains('king')){
+        if((originalCoords[1] === newCoords[1] - 1 || originalCoords[1] === newCoords[1] + 1) 
+        && 
+        (originalCoords[0] === newCoords[0] - 1 || originalCoords[0] === newCoords[0] + 1 )){
+            return true
+        } else if(originalCoords[1] === newCoords[1] - 2 || originalCoords[1] === newCoords[1] + 2 
+            && (originalCoords[0] === newCoords[0] - 2 || originalCoords[0] === newCoords[0] + 2) &&
+            middleSquareDifferentColor(originalCoords, newCoords))
+        {
+            let middleSquare = document.getElementById(getMiddleSquareId(originalCoords, newCoords))
+            middleSquare.innerHTML = ""
+            return true
+        }
+    } else if(movedPiece.classList.contains('black')){
+        if(originalCoords[1] === newCoords[1] + 1 
+            && (newCoords[0] === originalCoords[0] + 1 
+            || newCoords[0] === originalCoords[0] -1)){
+            return true
+        } else if(originalCoords[1] === newCoords[1] + 2 
+            && (originalCoords[0] === newCoords[0] - 2 
+            || originalCoords[0] === newCoords[0] + 2) && middleSquareDifferentColor(originalCoords, newCoords)){
+                let middleSquare = document.getElementById(getMiddleSquareId(originalCoords, newCoords))
+                middleSquare.innerHTML = ""
+                blackScore += 1
+                return true
         }
     } else {
         if(originalCoords[1] === newCoords[1] - 1 
             && (newCoords[0] === originalCoords[0] + 1 
             || newCoords[0] === originalCoords[0] -1)){
+            return true
+        } else if(originalCoords[1] === newCoords[1] - 2 
+            && (originalCoords[0] === newCoords[0] - 2 
+            || originalCoords[0] === newCoords[0] + 2) && middleSquareDifferentColor(originalCoords, newCoords)){
+            let middleSquare = document.getElementById(getMiddleSquareId(originalCoords, newCoords))
+            middleSquare.innerHTML = ""
+            redScore += 1
             return true
         }
     }
@@ -281,15 +357,13 @@ function movePieceToNewDiv(chosenSquare, originalSquare){
     chosenSquare.append(movedPiece)
 }
 
-
-
 document.addEventListener("drop", (event) => {
     // event.preventDefault();
     let originalSquare = movedPiece.parentNode
     let chosenSquare = event.target
 
     if(chosenSquare.classList.contains("black-square") && chosenSquare.innerHTML === ""){
-        if(limitMoves(chosenSquare, originalSquare, movedPiece)){
+        if(limitMoves(chosenSquare, originalSquare)){
             movePieceToNewDiv(chosenSquare, originalSquare)
             kingMe(chosenSquare)
             changeTurn()
