@@ -3,7 +3,7 @@
 Checkers built in HTML, CSS, and JavaScript
 
 MVP: 
-A playable checkers game with correct initial piece positioning, piece move limitation, promotable pieces, and a win condition that occurs when the entirety of one players pieces have been captured. 
+A playable checkers game with correct initial piece positioning, piece move limitation, promotable pieces, and a win condition that occurs when the entirety of one players pieces have been captured.
 
 Scope: 
 Drag-and-drop piece movement
