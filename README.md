@@ -10,8 +10,6 @@ Drag-and-drop piece movement
 
 Pieces will be set up in their correct positions when a game is started
 
-A button to restart the game/reset the positions of the pieces
-
 Move limitation by piece type, and altering moves by color
 
 Piece move options are highlighted in some way, showing where the selected piece is allowed to move
@@ -19,6 +17,7 @@ Piece move options are highlighted in some way, showing where the selected piece
 Pieces will be able to capture other pieces by moving diagoally across/over them
 
 Stretch goals: 
+A button to restart the game/reset the positions of the pieces. 
 Winning by the opposing player having no available moves left, a single player mode with a computer-controlled side. 
-Make the board responsive/fit to viewport. Make the piece size based on a ratio, not on fixed pixel width and height.
-Also, want to work on chess eventually, taking the similarities from checkers and building upon/improving them
+Make the board responsive/fit to viewport. Make the piece size based on a ratio, not on fixed pixel width and height. 
+Also, want to work on chess eventually, taking the similarities from checkers and building upon/improving them. 
