@@ -25,7 +25,7 @@
 
 
 
-//piece info @ board width 800px
+//piece info @ board width 816px for reference while determining percentages
 // height: 50px;
 // width: 50px;
 // border-radius: 50%;

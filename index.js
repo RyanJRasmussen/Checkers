@@ -3,8 +3,10 @@
 let redScore = 0;
 let blackScore = 0;
 
+//blacksTurn makes HTML draggable attribute either true or false, depending on the turn
 let blacksTurn = true;
 
+//some things in the scoreboard
 let turntracker = document.querySelector('#turntracker');
 let blackScoreTracker = document.querySelector('#blackScoreTracker');
 let redScoreTracker = document.querySelector('#redScoreTracker');
@@ -38,6 +40,8 @@ let activePositions = [
     [1, 0, 1, 0, 1, 0, 1, 0]
 ];
 
+//this array shows the position of squares and their respective IDs
+//used to find coordinates of squares and limit piece movement
 let boardPositions = [
     ['a8', 'b8', 'c8', 'd8', 'e8', 'f8', 'g8', 'h8'],
     ['a7', 'b7', 'c7', 'd7', 'e7', 'f7', 'g7', 'h7'],
@@ -49,7 +53,7 @@ let boardPositions = [
     ['a1', 'b1', 'c1', 'd1', 'e1', 'f1', 'g1', 'h1']
 ];
 
-//creates a piece of a chosen color on a specified square
+//makePiece creates a piece of a chosen color on a specified square
 function makePiece(squareID, color){
     let newPiece = document.createElement('div');
     newPiece.setAttribute('id', 'piece');
@@ -60,7 +64,7 @@ function makePiece(squareID, color){
     selectedSquare.appendChild(newPiece);
 }
 
-//sets the board up with pieces in their starting positions
+// setBoard sets the board up with pieces in their starting positions
 function setBoard(){
     for (let i = 0; i < 8; i++) {
         for (let j = 0; j < 8; j++) {
@@ -93,7 +97,6 @@ let blackPieces = document.querySelectorAll(".black");
 //function that revokes pieces ability to be interacted with if it is not their color's turn
 //does so by switching the 'draggable' element between true and false each time a move is made
 //draggable must be true for an element to be dragged
-
 function changeTurn(){
     if(blacksTurn === true){
         turntracker.textContent = "Black's turn";
@@ -113,9 +116,8 @@ function changeTurn(){
 }
 changeTurn();
 
-
+//this function changes the activePositions array to match where pieces are after each move is made
 function changeActiveLayout(chosenSquare, originalSquare){
-
     for (let i = 0; i < 8; i++) {
         for (let j = 0; j < 8; j++) {
             if(blacksTurn){
@@ -134,6 +136,8 @@ function changeActiveLayout(chosenSquare, originalSquare){
     }
 }
 
+//findChosenSquareCoordinates finds the coordinates of the square the user is attempting to move a piece to
+//these coordinates will be checked later on to determine if the movement will be allowed
 function findChosenSquareCoordinates(chosenSquare){
     let x;
     let y;
@@ -147,7 +151,8 @@ function findChosenSquareCoordinates(chosenSquare){
     }
     return [x, y]
 }
-
+//findOriginalSquareCoordinates finds the coordinates of the square a piece was originally on
+//the relationship between these coordinates and the chosenSquareCoordinates determines move legality
 function findOriginalSquareCoordinates(originalSquare){
     let a;
     let b;
@@ -161,7 +166,8 @@ function findOriginalSquareCoordinates(originalSquare){
     }
     return [a, b]
 }
-
+//kingMe adds 'king' to the classList of any piece that reaches the opposite row
+//this changes the border color to gold and allows the piece to move backwards
 function kingMe(chosenSquare){
     if(movedPiece.classList.contains("red") && chosenSquare.classList.contains("row1") && !movedPiece.classList.contains("king")){
         movedPiece.classList.add("king")
@@ -169,7 +175,8 @@ function kingMe(chosenSquare){
         movedPiece.classList.add("king")
     }
 }
-
+//getMiddleSquareId and middleSquareDifferentColor are used for capturing pieces
+//finding the middle square ID is used to determine if there is a piece in that position, and if it is the opposing color
 function getMiddleSquareId(originalCoords, newCoords){
     let middleSquareCoords = [((originalCoords[0] + newCoords[0])/2), ((originalCoords[1] + newCoords[1])/2)]
     let middleSquareId = boardPositions[middleSquareCoords[1]][middleSquareCoords[0]]
@@ -187,6 +194,9 @@ function middleSquareDifferentColor(originalCoords, newCoords){
     }
 }
 
+//limit colors applies logic used for capturing, without actually carrying out the capture functionality
+//it is used to highlight all valid squares by turning them green when hovered over
+//logic is explained further within the limitMoves function
 function limitColors(chosenSquare, originalSquare){
     let originalCoords = findOriginalSquareCoordinates(originalSquare)
     let newCoords = findChosenSquareCoordinates(chosenSquare)
@@ -227,11 +237,17 @@ function limitColors(chosenSquare, originalSquare){
     }
 }
 
+//limitMoves is the core logic of allowing/disallowing moves
 function limitMoves(chosenSquare, originalSquare){
+    //original and new coordinates to do calculations on
     let originalCoords = findOriginalSquareCoordinates(originalSquare)
     let newCoords = findChosenSquareCoordinates(chosenSquare)
 
+    //the first check is to see if a piece is a king, which is the case if it includes 'king' in its classlist
     if(movedPiece.classList.contains('king')){
+        //originalCoords[1] is the x coordinate, or column that a piece is targeting, while originalCoords[0] is the y coordinate, or row, that a piece is targeting
+        //while a piece is a king it can move to any square that is one square away in either direction on the x axis, and one away in either direction on y axis
+        //hence pluse or minus 1 for either parameter at the same time
         if((originalCoords[1] === newCoords[1] - 1 || originalCoords[1] === newCoords[1] + 1) 
         && 
         (originalCoords[0] === newCoords[0] - 1 || originalCoords[0] === newCoords[0] + 1 )){
@@ -240,6 +256,10 @@ function limitMoves(chosenSquare, originalSquare){
             && (originalCoords[0] === newCoords[0] - 2 || originalCoords[0] === newCoords[0] + 2) &&
             middleSquareDifferentColor(originalCoords, newCoords))
         {
+            //this piece of logic is for the case that there is a piece of the opposing color one square away on both x and y axes
+            //if this condition is reached when the piece is dropped, the capture logic "deletes" the captured piece
+            //it is deleted by the parent div (The square it is in) having its textContent changed to nothing, or ""
+            //then the score of the respective side is increased by one
             let middleSquare = document.getElementById(getMiddleSquareId(originalCoords, newCoords))
             middleSquare.innerHTML = ""
             if(movedPiece.classList.contains('red')){
@@ -251,6 +271,8 @@ function limitMoves(chosenSquare, originalSquare){
             }
             return true
         }
+        //the rest of this function shows similar logic for black and red pieces that are not kings, with the primary difference being
+        //restriction of movement along the y axis by only allowing for either an increase or decrease in the y coordinate while moving
     } else if(movedPiece.classList.contains('black')){
         if(originalCoords[1] === newCoords[1] + 1 
             && (newCoords[0] === originalCoords[0] + 1 
@@ -282,7 +304,7 @@ function limitMoves(chosenSquare, originalSquare){
     }
 }
 
-
+//this function actually places the piece in the new square once the requirements are met
 function movePieceToNewDiv(chosenSquare, originalSquare){
     chosenSquare.style.backgroundColor = "";
     changeActiveLayout(chosenSquare, originalSquare);
@@ -329,6 +351,7 @@ document.addEventListener("dragover", (event) => {
     event.preventDefault();
 }, false);
 
+//this event listener calls limitColors to check piece limitation and turn valid squares green when hovered over
 document.addEventListener("dragenter", (event) => {
     // change the squares color when hovered over
     // only allows hover events if the square is empty
@@ -342,6 +365,7 @@ document.addEventListener("dragenter", (event) => {
     }
 }, false);
 
+//this event listener returns green squares to their base color when the piece leaves them
 document.addEventListener("dragleave", (event) => {
     //change square color back to default when the selected piece leaves it
     if(event.target.classList.contains("black-square")){
@@ -349,8 +373,10 @@ document.addEventListener("dragleave", (event) => {
     }
 }, false);
 
+//the drop event listener checks that the square is empty, that it's a black square, and that the space is within the confines of the limitMoves function
+//once a piece is moved, the drop event listener checks if the piece should become a king, changes the turn, and checks if anyone has won the game
 document.addEventListener("drop", (event) => {
-    // event.preventDefault();
+    event.preventDefault();
     let originalSquare = movedPiece.parentNode
     let chosenSquare = event.target
 
