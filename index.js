@@ -80,8 +80,10 @@ setBoard();
 function winCondition(){
     if(redScore === 12){
         winTracker.textContent = "Red wins!"
+        turntracker.textContent = ""
     } else if(blackScore === 12){
         winTracker.textContent = "Black wins!"
+        turntracker.textContent = ""
     }
 }
 

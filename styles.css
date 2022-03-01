@@ -81,12 +81,14 @@ h1{
 
 #scoreboard {
     display: block;
-    position: relative;
-    font-size: 3em;
+    position: absolute;
+    left: -32%;
+    top: 50%;
+    font-size: 2em;
     padding: 1%;
     border: 5px outset slategray;
     background-color: snow;
-    width: 400px;
+    width: 210px;
     margin-left: auto;
     margin-right: auto;
 }
