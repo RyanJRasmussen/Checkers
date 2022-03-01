@@ -1,7 +1,5 @@
-//piece position representations
-//startingPositions remains constant since the starting positions will always be constant
-//activePositions is updated each time a drop event is fired
-
+//red and black score increase when pieces of the other color are captured
+//when either score reaches 12, that color wins
 let redScore = 0;
 let blackScore = 0;
 
@@ -10,10 +8,12 @@ let blacksTurn = true;
 let turntracker = document.querySelector('#turntracker');
 let blackScoreTracker = document.querySelector('#blackScoreTracker');
 let redScoreTracker = document.querySelector('#redScoreTracker');
+let winTracker = document.querySelector('#winTracker')
 blackScoreTracker.textContent = "Black's score: " + String(blackScore);
 redScoreTracker.textContent = "Red's score: " + String(redScore);
 
 //starting positions of pieces. 1 = black piece, 2 = red piece
+//setBoard function references this array to find which squares to call makePiece() on
 let startingPositions = [
     [0, 2, 0, 2, 0, 2, 0, 2],
     [2, 0, 2, 0, 2, 0, 2, 0],
@@ -79,9 +79,9 @@ setBoard();
 //the number 12 is used because each player begins with 12 pieces
 function winCondition(){
     if(redScore === 12){
-        alert('Red wins!');
+        winTracker.textContent = "Red wins!"
     } else if(blackScore === 12){
-        alert('Black wins!');
+        winTracker.textContent = "Black wins!"
     }
 }
 
@@ -112,68 +112,6 @@ function changeTurn(){
 changeTurn();
 
 
-//***** CITATION *****//
-// Below this point is implementation of a drag and drop piece movement system
-
-// The event listeners, of which there are 7, were coded based on the example at https://developer.mozilla.org/en-US/docs/Web/API/Document/drag_event
-// I referenced that code because I had never used event listeners for any of the events used in this drag and drop interface
-// It was helpful for understanding the different events that need to be/can be tracked
-
-//movedPiece will change to whichever piece is currently selected by the drag event
-//and will be used to find coordinates of squares that the piece is targeting
-
-let movedPiece;
-
-//creating drag event
-//the next 3 listeners will affect the pieces themselves
-
-document.addEventListener("drag", (event) => {
-    event.target.style.backgroundColor = "grey";
-}, false);
-
-
-//at the beginning of a drag event, the target of the event is changed to the color green
-document.addEventListener("dragstart", (event) => {
-    movedPiece = event.target;
-    event.target.style.opacity = "0.2";
-
-}, false);
-
-document.addEventListener("dragend", (event) => {
-    event.target.style.opacity = "1";
-    event.target.style.backgroundColor = '';
-}, false);
-
-//this stuff will happen to the squares the pieces are placed on/in
-
-document.addEventListener("dragover", (event) => {
-    // allows piece to be dropped onto a square
-    event.preventDefault();
-}, false);
-
-document.addEventListener("dragenter", (event) => {
-    // change the squares color when hovered over
-    // only allows hover events if the square is empty
-    let originalSquare = movedPiece.parentNode
-    let chosenSquare = event.target
-
-    if(chosenSquare.classList.contains("black-square") && chosenSquare.innerHTML === ""){
-        if(limitColors(chosenSquare, originalSquare)){
-            chosenSquare.style.backgroundColor = "green"
-        }
-    }
-}, false);
-
-document.addEventListener("dragleave", (event) => {
-    //change square color back to default when the selected piece leaves it
-    if(event.target.classList.contains("black-square")){
-            event.target.style.backgroundColor = "";
-    }
-}, false);
-
-//function to change 2d array each time a move is made
-// not currently referencing this array for anything, but I could use it to track piece colors and placements for AI
-
 function changeActiveLayout(chosenSquare, originalSquare){
 
     for (let i = 0; i < 8; i++) {
@@ -193,9 +131,6 @@ function changeActiveLayout(chosenSquare, originalSquare){
         }
     }
 }
-
-// functions to reference boardPositions and obtain coordinates of original square of a piece, 
-// and the new square it is attempting to be placed on
 
 function findChosenSquareCoordinates(chosenSquare){
     let x;
@@ -225,8 +160,6 @@ function findOriginalSquareCoordinates(originalSquare){
     return [a, b]
 }
 
-//function to add 'king' to a piece's classlist if it reaches the opposite row
-
 function kingMe(chosenSquare){
     if(movedPiece.classList.contains("red") && chosenSquare.classList.contains("row1") && !movedPiece.classList.contains("king")){
         movedPiece.classList.add("king")
@@ -234,7 +167,6 @@ function kingMe(chosenSquare){
         movedPiece.classList.add("king")
     }
 }
-
 
 function getMiddleSquareId(originalCoords, newCoords){
     let middleSquareCoords = [((originalCoords[0] + newCoords[0])/2), ((originalCoords[1] + newCoords[1])/2)]
@@ -292,8 +224,6 @@ function limitColors(chosenSquare, originalSquare){
         }
     }
 }
-
-
 
 function limitMoves(chosenSquare, originalSquare){
     let originalCoords = findOriginalSquareCoordinates(originalSquare)
@@ -357,6 +287,65 @@ function movePieceToNewDiv(chosenSquare, originalSquare){
     originalSquare.removeChild(movedPiece);
     chosenSquare.append(movedPiece);
 }
+
+//***** CITATION *****//
+// Below this point is implementation of a drag and drop piece movement system
+
+// The event listeners, of which there are 7, were coded based on the example at https://developer.mozilla.org/en-US/docs/Web/API/Document/drag_event
+// I referenced that code because I had never used event listeners for any of the events used in this drag and drop interface
+// It was helpful for understanding the different events that need to be/can be tracked
+
+//movedPiece will change to whichever piece is currently selected by the drag event
+//and will be used to find coordinates of squares that the piece is targeting
+
+let movedPiece;
+
+//creating drag event
+//the next 3 listeners will affect the pieces themselves
+
+document.addEventListener("drag", (event) => {
+    event.target.style.backgroundColor = "grey";
+}, false);
+
+
+//at the beginning of a drag event, the target of the event is changed to the color green
+document.addEventListener("dragstart", (event) => {
+    movedPiece = event.target;
+    event.target.style.opacity = "0.2";
+
+}, false);
+
+document.addEventListener("dragend", (event) => {
+    event.target.style.opacity = "1";
+    event.target.style.backgroundColor = '';
+}, false);
+
+//this stuff will happen to the squares the pieces are placed on/in
+
+document.addEventListener("dragover", (event) => {
+    // allows piece to be dropped onto a square
+    event.preventDefault();
+}, false);
+
+document.addEventListener("dragenter", (event) => {
+    // change the squares color when hovered over
+    // only allows hover events if the square is empty
+    let originalSquare = movedPiece.parentNode
+    let chosenSquare = event.target
+
+    if(chosenSquare.classList.contains("black-square") && chosenSquare.innerHTML === ""){
+        if(limitColors(chosenSquare, originalSquare)){
+            chosenSquare.style.backgroundColor = "green"
+        }
+    }
+}, false);
+
+document.addEventListener("dragleave", (event) => {
+    //change square color back to default when the selected piece leaves it
+    if(event.target.classList.contains("black-square")){
+            event.target.style.backgroundColor = "";
+    }
+}, false);
 
 document.addEventListener("drop", (event) => {
     // event.preventDefault();

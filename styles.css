@@ -81,15 +81,17 @@ h1{
 
 #scoreboard {
     display: block;
-    position: absolute;
-    top: 37%;
-    left: -50%;
+    position: relative;
     font-size: 3em;
     padding: 1%;
     border: 5px outset slategray;
     background-color: snow;
+    width: 400px;
+    margin-left: auto;
+    margin-right: auto;
 }
 
 .scoreboardpart {
-    display: flex;
+    display: block;
+    text-align: center;
 }
